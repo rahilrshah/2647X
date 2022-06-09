@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<head>
+    <title>vEx SpinUp Field Visualization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <script type = "text/javaScript" src = "algorithm.js";></script>
+</head>
+    <body id= "body">
+        <div id="coordInput"> 
+            <form>
+                <label for="input">Input Coordinates Here:</label><br>
+                <textarea id="coords" name="coordinates" rows="15" cols="30"></textarea>
+            </form>
+            <button id="subButton">Submit</button>
+        </div>
+        <div id="field" style="display:none">
+                <img id="fieldBackground" src="SpinUp Field.png"></img>
+                <svg id="graph" style="display: none">
+                    <polyline id="robotTrace" stroke="black" fill="none"/>
+                    <rect  id="robot" rx="5" ry="5"width="49" height = "49"/>
+                </svg>
+        </div>
+        <button id="plotButton" style="display:none">Plot Course</button>
+    </body>
+<script type="text/javaScript">
+    var coordinates = new Array();
+    var width;
+    var height;
+    var svg = document.getElementById("graph");
+    var svgRobot = document.getElementById("robot");
+    var svgTrace = document.getElementById("robotTrace");
+    document.getElementById("subButton").onclick = function (){
+    var str = document.getElementById("coords").value;
+    console.log(str);
+    for(var i = 0;i< str.length;i++){
+        const coord = [str.substring(str.indexOf("(")+1,str.indexOf(",")), str.substring(str.indexOf(",")+1,str.indexOf(")"))]
+        coordinates.push(coord);
+        str=str.substring(str.indexOf(")") +1,str.length);
+        console.log(str);
+    }
+    console.log(coordinates);
+    svgTrace.setAttribute('points', Math.round((coordinates[0][0]*2.757)+25) + "," + Math.round((coordinates[0][1]*2.757)+25));
+    svgRobot.setAttribute('x',Math.round(coordinates[0][0]*2.757));
+    svgRobot.setAttribute('y',Math.round(coordinates[0][1]*2.757));
+    coordinates.shift();
+    document.getElementById("coordInput").style.display= "none";
+    document.getElementById("field").style.display="flex";
+    document.getElementById("plotButton").style.display= "flex";
+    document.getElementById("graph").style.display= "flex";
+
+    }
+    document.getElementById("plotButton").onclick = function (){
+        var id = null;
+        var i = 0;
+        function move(xVal, yVal){
+            const myPromise = new Promise((resolve,reject) => {
+                var point = svg.createSVGPoint();
+                var xPos = Math.round(svgRobot.getAttribute('x'));
+                var yPos = Math.round(svgRobot.getAttribute('y'));
+                var dY = (yVal-yPos)/(xVal-xPos);
+                var dX = (xVal-xPos)/(yVal-yPos);
+                console.log(dY);
+                console.log(dX);
+                console.log("position: " + xPos + ", " + yPos);
+                console.log(xVal +"," + yVal);
+                clearInterval(id);
+                id= setInterval(frame,10);
+                function frame(){
+                    if(dY>dX || dY === Infinity || dY === -Infinity){
+                        if(yPos==yVal){
+                            console.log(svgRobot.getAttribute('x')+","+svgRobot.getAttribute('y'));
+                            resolve();                                
+                            clearInterval(id);
+                        } else {
+                            if(xPos> xVal || yPos> yVal){
+                                xPos-=dX;
+                                yPos--;
+                                point.x = xPos+25;
+                                point.y = yPos+25;
+                                svgTrace.points.appendItem(point);
+                                svgRobot.setAttribute('x',xPos);
+                                svgRobot.setAttribute('y',yPos);
+                            } else if(xPos< xVal || yPos < yVal){                                
+                                xPos+=dX;
+                                yPos ++;
+                                point.x = xPos+25;
+                                point.y = yPos+25;
+                                svgTrace.points.appendItem(point);
+                                svgRobot.setAttribute('x',xPos);
+                                svgRobot.setAttribute('y',yPos);
+                            } 
+                        }
+                        
+                    } else {
+                        if(xPos==xVal){
+                            console.log(svgRobot.getAttribute('x')+","+svgRobot.getAttribute('y'));
+                            resolve();                                
+                            clearInterval(id);
+                        } else {
+                            if(xPos > xVal || yPos> yVal){
+                                xPos--;
+                                yPos-=dY;
+                                point.x = xPos+25;
+                                point.y = yPos+25;
+                                svgTrace.points.appendItem(point);
+                                svgRobot.setAttribute('x',xPos);
+                                svgRobot.setAttribute('y',yPos);
+                            } else if (xPos< xVal || yPos < yVal){
+                                xPos++;
+                                yPos += dY;
+                                point.x = xPos+25;
+                                point.y = yPos+25;
+                                svgTrace.points.appendItem(point);
+                                svgRobot.setAttribute('x',xPos);
+                                svgRobot.setAttribute('y',yPos);
+                            }
+                        }        
+                    }                
+                } 
+            });
+            return myPromise;
+            
+        }
+        console.log("hi");
+        async function draw() {
+            console.log("starting to Draw");
+
+            for(var i=0;i<coordinates.length;i++){
+                await move(Math.round(coordinates[i][0]*2.757),Math.round(coordinates[i][1]*2.757));
+            }   
+        }
+        draw();
+
+    }
+
+</script>
+

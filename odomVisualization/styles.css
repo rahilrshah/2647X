@@ -1,0 +1,25 @@
+#field{
+    background-color: grey;
+    position: relative;
+    width:800px;
+    height:598px;
+    justify-content: center;
+    align-items: center;
+}
+#fieldBackground{
+
+    width:700px;
+    object-fit: contain;
+}
+#plotButton{
+    min-height: 20px;
+    margin: 10px;
+}
+#graph{
+    width: 397px;
+    height: 397px;
+    z-index: 1;
+    position: absolute;
+    left: 204px;
+    bottom:102px;
+}
